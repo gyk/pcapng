@@ -281,6 +281,7 @@ impl<'a> Iterator for BlockIter<'a> {
     type Item = Block;
 
     fn next(&mut self) -> Option<Block> {
+
         match read_block(self.r) {
             Ok(block) => Some(block),
             Err(_) => None
@@ -449,7 +450,9 @@ impl InterfaceDescriptionBlock {
 impl EnhancedPacketBlock {
     pub fn read<BO: ByteOrder>(r: &mut io::Read) -> Result<EnhancedPacketBlock, Error> {
         let interface_id = try!(r.read_u32::<BO>());
-        let ts = try!(r.read_u64::<BO>());
+        let ts_high = try!(r.read_u32::<BO>());
+        let ts_low = try!(r.read_u32::<BO>());
+        let ts = (ts_high as u64) << 32 | (ts_low as u64);
         let cap_len = try!(r.read_u32::<BO>()) as usize;
         let len = try!(r.read_u32::<BO>());
 
